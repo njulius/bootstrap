@@ -1,6 +1,6 @@
 # Abadie & Imbens (2008) Simulation
 # Author: Nik Julius
-# Last Modified: June 29, 2016
+# Last Modified: July 28, 2016
 
 # A function that performs a single naive bootstrap of a dataset Z=(X,W,Y) and returns
 # the bootstrap estimator of the treatment effect
@@ -29,76 +29,75 @@ naiveBootstrap <- function(Z) {
   
   # Find matches for each X[i] in the treated sample
   
-  matchingIndex = rep(0, times = n1)
+  matchingIndex <- matrix(, nrow = n0, ncol = n1)
   
-  for(i in 1:length(treatedBootstrap[,1])) {
+  # In matchingIndex, the column corresponds to the treated observation we seek to match. Each number
+  # in that column is an index for the closest matching control observation. In theory, there could be
+  # as many as n0 matching control observations.
+  
+  # Step 1: Find a closest match
+  
+  for(i in 1:n1) {
+    
+    # Assume match is index 1, then replace matching index each time we find a closer match
+    
     x <- treatedBootstrap[i,1]
     
-    # Assume match is index 1, then replace matching index each time
-    # we find a closer match. There is certainly a better way of doing
-    # this
+    matchingIndex[1,i] <- 1
     
-    # This finds one of the indices for which the match is closest. It
-    # DOES NOT find more than one, and will return the lowest index only
-    # if more than one match of the same closeness is present in the bootstrap
-    # sample
-    matchingIndex[i] <- 1
-    
-    for(j in 1:length(controlBootstrap[,1])) {
+    for(j in 1:n0) {
+      
       dist <- abs(x - controlBootstrap[j,1])
       
-      if(dist < abs(x - controlBootstrap[matchingIndex[i],1])) {
-        matchingIndex[i] <- j
+      if(dist < abs(x - controlBootstrap[matchingIndex[1,i],1])) {
+        matchingIndex[1,i] <- j
       } else {
-        matchingIndex[i] <- matchingIndex[i]
+        matchingIndex[1,i] <- matchingIndex[1,i]
       }
     }
     
-  }
-  
-  # The variable matchingIndex now contains n1 numbers that give us one of the
-  # closest matches to each treated unit. For now, we operate under the assumption
-  # that if multiple matches are present, this is ONLY because the same control
-  # unit was sampled multiple times in the bootstrap - that is, if there are multiple
-  # matches, all of the matches are the same original observation. We will sanity 
-  # check this later on
-  
-  numMatches <- rep(0, times = n1)
-  
-  for(i in 1:length(treatedBootstrap[,1])) {
-    x <- treatedBootstrap[i,1]
+    # Now, for treatedBootstrap[i,1], matchingIndex[1,i] contains the closest match. We proceed
+    # to check for multiple close matches, and fill in matchingIndex[q,i], increasing q each time
+    # we find another match
     
-    # We proceed essentially the same way as before, except when we find a new match
-    # we increment numMatches[i] instead of recording the match index
+    numMatches <- 0 # This prevents the same match from being recorded twice
+    # Frankly this step probably does everything but I'll optimize later
     
-    for(j in 1:length(controlBootstrap[,1])) {
-      dist <- abs(x - controlBootstrap[j,1])
+      for(j in 1:n0) {
+        dist <- abs(x - controlBootstrap[j,1])
       
-      if(dist == abs(x - controlBootstrap[matchingIndex[i],1])) {
-        numMatches[i] <- numMatches[i] + 1
-      } else {
-        numMatches[i] <- numMatches[i]
+        if(dist == abs(x - controlBootstrap[matchingIndex[1,i],1])) {
+          numMatches <- numMatches + 1
+          matchingIndex[numMatches,i] <- j
+        } else {
+          matchingIndex[1,i] <- matchingIndex[1,i]
+        }
       }
+    
     }
-  }
-  
-  # Now numMatches[i] tells us how many control unit matches there are for each treated
-  # unit i in the bootstrap sample.
-  
-  ####
-  #
-  # I have not figured out how to sanity check the previous assumption, so we're proceeding
-  # as if it doesn't matter. I'm pretty sure it actually doesn't, to be honest.
-  #
-  ####
   
   # Now we want to construct estimates of the untreated outcome for our treated units. We do this
-  # by taking the outcome for their closest match.
+  # by taking the outcome for their closest match if there is only 1 match, and by taking the average
+  # of outcomes if there is more than one match
   
   y0Hat <- rep(0, times = n1)
   
   for(i in 1:length(treatedBootstrap[,1])) {
-    y0Hat[i] <- controlBootstrap[matchingIndex[i],3]
+    
+    # Check if there is more than one match
+    if(is.na(matchingIndex[2,i])) {
+      # Then only one match
+      y0Hat[i] <- controlBootstrap[matchingIndex[1,i],3]
+    } else {
+      # There is more than one match, thus find number of matches
+      count <- n0 - sum(is.na(matchingIndex[,i]))
+      # Sum y0's for the matches
+      intermediateSum <- 0
+      for(j in 1:count) {
+        intermediateSum <- intermediateSum + controlBootstrap[matchingIndex[j,i]]
+      }
+      y0Hat[i] <- intermediateSum / count
+    }
   }
   
   # Now, we can construct a vector of treatement effect estimates, one from each observation in
