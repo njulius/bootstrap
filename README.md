@@ -9,3 +9,6 @@
 3. aiSimulation()
 
   Function takes 3 arguments that are to be fed to genData(), and one scalar argument that determines how many bootstraps to run. Function returns the value of N1 * { E[(tauHat_b - tauHat)^2 | Z] - Var(tauHat) }, which should converge in probability to 0 according to Abadie & Imbens (2008).
+4. findMatches()
+  
+  Function takes one argument, which is expected to be the output of genData(). See naiveBootstrap() for more on this expectation. Function returns a sparse logical matrix, which will be explained better here when I feel up to figuring out how to get a matrix onto this.
