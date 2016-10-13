@@ -61,6 +61,7 @@ findMatches <- function(Z) {
     for(j in 1:numMatches[i]) {
       matches[orderedDists[j,1],i] <- TRUE
     }
+  }
     
     # Check that each column of the matrix has at least one match (that is, check that this worked)
     
@@ -73,5 +74,4 @@ findMatches <- function(Z) {
     }
     
     return(matches)
-  }
 }
