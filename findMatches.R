@@ -6,6 +6,8 @@
 # the closest match(es) for each treated unit. 
 
 findMatches <- function(Z) {
+  require(Matrix)
+  
   # Variables 
   #
   # Z should be the output of the function genData(), or in general a matrix with 3
