@@ -1,16 +1,15 @@
 # Naive Monte Carlo simulation
 
 doMCSim <- function(iterations, numObs, treatRatio, trueTau, numBoots) {
+  
+  variances = rep(0, times = iterations)
 
   for(i in 1:iterations) {
     # Generate Dataset
     Z <- genData(numObs, treatRatio, trueTau)
     
     # This stores the treatment effect estimates from each bootstrap
-    treatmentEffects = rep(0, times = numBoots)
-    
-    # This stores the treatment effect variances from each iteration
-    variances = rep(0, times = iterations)
+    treatEffects = rep(0, times = numBoots)
     
     for(j in 1:numBoots) {
       # Perform a naive bootstrap
@@ -28,13 +27,14 @@ doMCSim <- function(iterations, numObs, treatRatio, trueTau, numBoots) {
     
       bootedZ <- rbind(treatedBootstrap, controlBootstrap)
     
-      treatmentEffects[j] <- getATE(bootedZ)
+      treatEffects[j] <- getATE(bootedZ)
+      variances[i] <- var(treatEffects)
     }
     
     # We should now have a full vector of treatment effects
     
-    # We get the variance and store it
-    variances[i] <- var(treatmentEffects)
+    # Progress report
+    paste("Iteration ", i, " of ", iterations)
     
   }
   
