@@ -12,6 +12,8 @@ wildBootstrap <- function(Z, matches) {
   
   # Get residuals for each treatment unit
   
+  tauHat <- getATE(Z)
+  
   resids <- rep(0, times = n1)
   
   for(i in 1:n1) {
@@ -24,7 +26,7 @@ wildBootstrap <- function(Z, matches) {
     } else {
       controlHat <- mean(mates[,3])
     }
-    resids[i] <- treatedSample[i] - controlHat
+    resids[i] <- treatedSample[i] - controlHat - tauHat
   }
   
   # Construct perturbed outcomes
