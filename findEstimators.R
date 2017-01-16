@@ -40,7 +40,7 @@ getATE <- function(Z) {
     
     # Get vector of treatment effects for each match
     
-    treatmentEffects <- treatedSample[i,3] - mates
+    treatmentEffects <- treatedSample[i,3] - mean(mates[,3])
     
     # Get mean effect and add to estimatedATE
     
@@ -57,3 +57,4 @@ getATE <- function(Z) {
 getATET <- function(Z) {
   # Actually fairly sure that's what I do in getATE(). This is left alone until I figure it out  
 }
+
