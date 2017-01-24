@@ -21,12 +21,13 @@ wildBootstrap <- function(Z, matches) {
     mates <- controlSample[which(matches[,i] == TRUE),]
     
     # Need to do something fiddly to have the correct number of dimensions for this
-    if(length(mates[1] == 1)) {
+    if(length(mates) == 3) {
       controlHat <- mean(mates[3])
     } else {
       controlHat <- mean(mates[,3])
     }
-    resids[i] <- treatedSample[i] - controlHat - tauHat
+    resids[i] <- treatedSample[i,3] - controlHat - tauHat
+    
   }
   
   # Construct perturbed outcomes
