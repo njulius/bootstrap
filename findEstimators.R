@@ -32,7 +32,7 @@ getATE <- function(Z) {
   # Now, iterate through the columns of matches, and sum up the treatment effect estimates from
   # each match. Then, obviously, average them.
   
-  treatmentEffects = rep(0, times=3)
+  treatmentEffects = rep(0, times=n1)
   
   for(i in 1:n1) {
     # Get the vector (which may contain only one element) of closest matches for treated 
