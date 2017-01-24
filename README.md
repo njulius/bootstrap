@@ -1,4 +1,4 @@
-# R Functions
+# R Functions (Outdated)
 
 1. genData()
 
