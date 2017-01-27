@@ -34,8 +34,7 @@ genData <- function(numObs, treatRatio, trueTau) {
   
   W <- rep(0, times = n)
   
-  n1 <- (a / (1+a)) * n
-  n0 <- (1 / (1+a)) * n
+  n1 <- round((a / (1+a)) * n)
   
     # Create sequence of indices to sample from
     indices <- seq(from = 1, to = n, by = 1)
