@@ -48,9 +48,14 @@ genData <- function(numObs, treatRatio, trueTau) {
       W[treatedIndices[i]] <- 1
     }
   
-  # Generate Y[i]'s such that they are distributed degenerately with
-  # P[Yi(1) = t] = 1 and the conditional distribution of Yi(0) given Xi
-  # i s N(0,1)
+  # The below is NOT a correct description of what I did. I did here what
+  # I believed A&I said, but my belief was incorrect. This DGP does NOT
+  # generate data satisfying Assumption A.4.
+  #######################################################################
+  # Generate Y[i]'s such that they are distributed degenerately with    #
+  # P[Yi(1) = t] = 1 and the conditional distribution of Yi(0) given Xi #
+  # i s N(0,1)                                                          #
+  #######################################################################
   
   Y = rnorm(n, mean = 0, sd = 1)
   
