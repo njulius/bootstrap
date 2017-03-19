@@ -33,7 +33,8 @@ wildBootstrap <- function(Z, matches) {
   # Center the residuals
   
   center <- mean(resids)
-  centeredResids[i] <- resids - center
+  centeredResids <- resids
+  centeredResids <- resids - center
   
   # Construct perturbed outcomes
   
