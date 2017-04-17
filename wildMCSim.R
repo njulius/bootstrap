@@ -32,5 +32,7 @@ wildMCSim <- function(iterations, numObs, treatRatio, trueTau, numBoots) {
     
   }
   
-  return(variances)
+  out <- cbind(variances, targets)
+  
+  return(out)
 }
