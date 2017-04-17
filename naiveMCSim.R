@@ -36,10 +36,8 @@ doMCSim <- function(iterations, numObs, treatRatio, trueTau, numBoots) {
     
     # We should now have a full vector of treatment effects
     
-    # Progress report
-    paste("Iteration ", i, " of ", iterations)
-    
   }
+  out <- cbind(variances, targets)
   
-  return(variances)
+  return(out)
 }
