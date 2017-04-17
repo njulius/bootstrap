@@ -3,6 +3,7 @@
 doMCSim <- function(iterations, numObs, treatRatio, trueTau, numBoots) {
   
   variances = rep(0, times = iterations)
+  targets = rep(0, times = iterations)
 
   for(i in 1:iterations) {
     # Generate Dataset
@@ -10,6 +11,8 @@ doMCSim <- function(iterations, numObs, treatRatio, trueTau, numBoots) {
     
     # This stores the treatment effect estimates from each bootstrap
     treatEffects = rep(0, times = numBoots)
+    matches <- findMatches(Z)
+    condVar <- condVar(matches)
     
     for(j in 1:numBoots) {
       # Perform a naive bootstrap
