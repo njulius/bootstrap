@@ -1,6 +1,7 @@
 wildMCSim <- function(iterations, numObs, treatRatio, trueTau, numBoots) {
   
   variances = rep(0, times = iterations)
+  targets = rep(0, times = iterations)
   
   for(i in 1:iterations) {
     # Generate Dataset
@@ -11,6 +12,7 @@ wildMCSim <- function(iterations, numObs, treatRatio, trueTau, numBoots) {
     
     # Get matching matrix
     matches <- findMatches(Z)
+    targets[i] <- condVar(matches)
     
     for(j in 1:numBoots) {
       # Perform a wild
