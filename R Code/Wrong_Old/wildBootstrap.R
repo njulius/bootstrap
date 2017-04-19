@@ -1,4 +1,8 @@
 # wild bootstrap
+###
+### WRONG
+### UNCENTERED RESIDUALS
+###
 
 wildBootstrap <- function(Z, matches) {
   
