@@ -1,5 +1,4 @@
 # Documentation
-========
 
 1. `dgpFun()` and `genData()`
 
@@ -9,4 +8,16 @@ In terms of use, both functions take 3 inputs - `numObs`, `treatRatio`, and `tru
 
 2. `findMatches()`
 
-`findMatches()` produces a matching matrix for a given dataset. It takes as input a `N x 3` matrix, whose columns are (respectively) the covariate value, the treatment indicator, and the outcome value. 
+`findMatches()` produces a matching matrix for a given dataset. It takes as input a `N x 3` matrix, whose columns are (respectively) the covariate value, the treatment indicator (`0` or `1` only), and the outcome value. It outputs a spare logical matrix of dimensions `N0 x N1`, where `N0` is the number of untreated (control) units and `N1` is the number of treated units. An example matrix would look something like this:
+
+|  | T1 | T2 | T3 |
+|--|----|----|----|
+|C1|    |TRUE|    |
+|C2|TRUE|    |TRUE|
+|C3|    |    |    |
+
+This matrix indicates that the closest control unit to T2 is C1, and that C2 is the closest match to both T1 and T3.
+
+3. `getATE()`
+
+`getATE()` returns the estimated treatment effect on the treated, using nearest-neighbor matching, for a given dataset. It takes as input a `N x 3` matrix, whose columns are (respectively) the covariate value, the treatment indicator (`0` or `1` only), and the outcome value. It returns a scalar.
