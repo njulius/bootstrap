@@ -8,7 +8,7 @@ In terms of use, both functions take 3 inputs - `numObs`, `treatRatio`, and `tru
 
 2. `findMatches()`
 
-`findMatches()` produces a matching matrix for a given dataset. It takes as input a `N x 3` matrix, whose columns are (respectively) the covariate value, the treatment indicator (`0` or `1` only), and the outcome value. It outputs a spare logical matrix of dimensions `N0 x N1`, where `N0` is the number of untreated (control) units and `N1` is the number of treated units. An example matrix would look something like this:
+`findMatches()` produces a matching matrix for a given dataset. It takes as input an `N x 3` matrix, whose columns are (respectively) the covariate value, the treatment indicator (`0` or `1` only), and the outcome value. It outputs a spare logical matrix of dimensions `N0 x N1`, where `N0` is the number of untreated (control) units and `N1` is the number of treated units. An example matrix would look something like this:
 
 |  | T1 | T2 | T3 |
 |--|----|----|----|
@@ -20,4 +20,12 @@ This matrix indicates that the closest control unit to T2 is C1, and that C2 is 
 
 3. `getATE()`
 
-`getATE()` returns the estimated treatment effect on the treated, using nearest-neighbor matching, for a given dataset. It takes as input a `N x 3` matrix, whose columns are (respectively) the covariate value, the treatment indicator (`0` or `1` only), and the outcome value. It returns a scalar.
+`getATE()` returns the estimated treatment effect on the treated, using nearest-neighbor matching, for a given dataset. It takes as input an `N x 3` matrix, whose columns are (respectively) the covariate value, the treatment indicator (`0` or `1` only), and the outcome value. It returns a scalar.
+
+4. `naiveBootstrap()`
+
+`naiveBootstrap()` takes, as should be expected by this point, an `N x 3` matrix as input, subject to the same column restrictions as everywhere else, and returns a new `N x 3` matrix constructed by sampling rows from the input matrix with replacement. The new matrix will have the same treatment ratio as the input matrix.
+
+5. `wildBootstrap()`
+
+`wildBootstrap()` again takes an `N x 3` matrix with the same column restrictions as input. It returns a new `N x 3` matrix, again with the treatment ratio unchanged. The difference is that this function constructs the new matrix by changing the outcome values in each row according to a rule. Among other things, this means that the matching matrix is unchanged - `findMatches(Z)` and `findMatches(wildBootstrap(Z))` *should* return the same matching matrix.
