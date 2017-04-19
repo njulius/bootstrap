@@ -1,6 +1,6 @@
 # Naive Monte Carlo simulation
 
-doMCSim <- function(iterations, numObs, treatRatio, trueTau, numBoots) {
+naiveMCSim <- function(iterations, numObs, treatRatio, trueTau, numBoots) {
   
   variances = rep(0, times = iterations)
   targets = rep(0, times = iterations)
