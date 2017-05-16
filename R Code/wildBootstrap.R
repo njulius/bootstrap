@@ -1,5 +1,7 @@
 # wild bootstrap with recentering
 
+# UNIT TESTED SUCCESSFULLY
+
 wildBootstrap <- function(Z, matches) {
   
   # Split sample
@@ -16,17 +18,19 @@ wildBootstrap <- function(Z, matches) {
   
   resids <- rep(0, times = n1)
   
+  controlHat <- rep(0, times = n1)
+  
   for(i in 1:n1) {
     # Find matched control unit(s) and construct estimated control outcome
     mates <- controlSample[which(matches[,i] == TRUE),]
     
     # Need to do something fiddly to have the correct number of dimensions for this
     if(length(mates) == 3) {
-      controlHat <- mean(mates[3])
+      controlHat[i] <- mean(mates[3])
     } else {
-      controlHat <- mean(mates[,3])
+      controlHat[i] <- mean(mates[,3])
     }
-    resids[i] <- treatedSample[i,3] - controlHat - tauHat
+    resids[i] <- treatedSample[i,3] - controlHat[i] - tauHat
     
   }
   
@@ -53,7 +57,7 @@ wildBootstrap <- function(Z, matches) {
     
     # Perturb outcome
     
-    bootTreatedSample[i,3] <- treatedSample[i,3] + perturb
+    bootTreatedSample[i,3] <- controlHat[i] + tauHat + perturb
     
   }
   
