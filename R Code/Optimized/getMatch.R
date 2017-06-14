@@ -27,16 +27,14 @@ getMatch <- function(Z) {
   # distMatrix is an N0 x N1 matrix. The ij'th element is the distance between
   # the covariate value of the j'th treated unit and the i'th control unit.
   
-  # Get the minimum values in each column
-  minima <- apply(distMatrix, 2, min)
+  # We want to find the row(s) which contain the lowest value(s) for each i.
+  # These rows are the matching control units.
+  matches <- Matrix(apply(distMatrix, 2, function(x) x == min(x)), sparse = TRUE)
   
-  # We want to find the row(s) which contain(s) minima[i] for each i.
-  # These rows are the matching control units. 
-  matches <- Matrix(apply(distMatrix, 2, function(x) x == minima), sparse = TRUE)
-  
-  # NOTE
-  # This appears to work in testing. I have no idea why it works, so I'm worried.
   
   return(matches)
- 
+  
 }
+                          
+# UNIT TEST PASSED ON
+# JUNE 14 2017
