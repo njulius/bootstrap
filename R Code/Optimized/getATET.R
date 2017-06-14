@@ -49,3 +49,6 @@ getATET <- function(Z, matches) {
   
   return(ATET)
 }
+
+UNIT TEST PASSED
+JUNE 14 2017
