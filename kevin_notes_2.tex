@@ -1,0 +1,185 @@
+\documentclass{article}
+
+\usepackage{amsfonts}
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage[margin=1in]{geometry}
+\usepackage[small]{caption}
+\usepackage{setspace}
+\usepackage{hyperref}
+
+\usepackage{biblatex}
+\addbibresource{bibliography.bib}
+
+\usepackage[shortlabels]{enumitem}
+
+\usepackage[nottoc,notlot,notlof]{tocbibind}
+
+
+\newtheorem{example}{Example}[section]
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{assumption}{Assumption}[section]
+\newtheorem{lemma}{Lemma}[section]
+\newtheorem{claim}{Claim}[section]
+\newtheorem{definition}{Definition}[section]
+\newtheorem{proposition}{Proposition}[section]
+\newtheorem{corollary}{Corollary}[section]
+
+\onehalfspacing
+
+\DeclareMathOperator{\E}{E}
+\DeclareMathOperator{\Var}{Var}
+\DeclareMathOperator{\Cov}{Cov}
+\DeclareMathOperator{\tr}{tr}
+\DeclareMathOperator{\rank}{Rank}
+
+\newcommand{\ta}{\tau^{t}}
+\newcommand{\hta}{\hat \tau^{t}}
+\newcommand{\tb}{\tau_{b}^{t}}
+\newcommand{\htb}{\hat \tau_{b}^{t}}
+\newcommand{\he}{\hat{\epsilon}_{i}}
+\newcommand{\Yi}{Y_{i}^{obs}}
+\newcommand{\Yb}{Y_{i}^{*}}
+\newcommand{\hYi}{\hat{Y_{i}(0)}}
+\newcommand{\us}{u_{i}^{*}}
+
+\begin{document}
+
+\title{Kevin's Notes on Matching Estimators for Nik}
+\author{Kevin D. Duncan}
+\maketitle
+
+\begin{table}[h!]
+\title{Proposed Procedure}
+\begin{enumerate}
+\item Estimate $\hta$
+\item Get residuals $\he = \Yi-\hYi-\hta$ for each treated observation $i$. (you constantly forget the hat on the epsilons, its important to denote that its a sample residual and not from the population!)
+\item For each $i$, draw $\us = \bigg\{ \begin{array}{cc} 1 & \text{ with probability } 1/2 \\ -1 & \text{with probability} 1/2 \end{array}$. I.e. the Rademacher distribution
+\item Create $N_{1}$ bootstrap outcomes, $\Yb = \hYi +\hta + \us\he$
+\item Estimate $\htb$ on the bootstrap sample $Z = \{\Yb, W, X\}$
+\item Repeat the steps 3-5 for $b = 1,...,B$ bootstraps, and estimate $\hat \tau$ as the sample variance of $\hat \tau_{b}$ over the $b$ bootstraps.
+\end{enumerate}
+\label{boot}
+\end{table}
+
+\section{A Brief Rederivation of the ATET}
+
+Some Assumptions from \cite{OnR:16} and \cite{AnI:08}
+
+\begin{assumption}\label{ATETasmp}
+
+\begin{enumerate}
+\item Conditional on $W_{i} = w$ the sample consistss of independent draws from $Y,X \mid W = w$ for $w \in \{0,1\}$. For some $r \leq 1,\ N_{1}^{r}/N_{0} \to \theta \in (0,\infty)$
+\item $X$ is continuously distributed on compact and convex support $X \subset R^{k}$. The density of $X$ is bounded and bounded away from zero on $\mathbb{X}$.
+\item $W$ is independent of $Y_{i}(0)$ conditional on $X = x$ for almost every $x$. There exists a positive constant $c$ such that $P(W = 1 \mid X= x) \leq 1-c$ for almost every $x$
+\item For $w = 0,1$, $\mu(w,x)$ and $\sigma^{2}(w,x)$ are Lipschitz in $\mathbb{X}$, $\sigma^{2}(w,x)$ is bounded away from zero on $\mathbb{X}$, and $\E[Y^{4} \mid W=w, X=x]$ is bounded uniformly on $\mathbb{X}$.
+\end{enumerate}
+
+\end{assumption}
+
+For each individual we observe an outcome variable $Y_{i}^{obs}$, a set of covariates, $X_{i}$, and whether or not an individual was treated, $W_{i}$, which is either $1$, or $0$. For both the treated and untreated groups, we can define the conditional means, $\mu(0,x) = \E[Y_{i}(0) \mid X_{i} = x]\quad \mu(1,x) = \E[Y_{i}(1) \mid X_{i} = x]$. Then, for each individual $i$, the Average Treatment Effect on the Treated (ATET) is
+
+\begin{align*} \tau_{i}^{t} &= \mu(1,x) - \mu(0,x) \end{align*}
+
+For each group, we have $Y_{i}^{obs} = \mu(W_{i},X_{i})+e_{i}$, whether the error structure may dependend on whether or not an individual was treated or not. We can also define $\hat Y_{i}(0)$ to be the "local average" of the M closest individuals who were in the control group to the treated individual (see \cite{InR:15} or \cite{AnI:06} for a more explicit deviation of this). Assuming both groups have mean zero errors, we have the sample individual ATET,
+
+\begin{align*} \hat \tau_{i}^{t} &= Y_{i}^{obs}-\hat Y_{i}(0) = Y_{i}(1)-\hat Y_{i}(0) \end{align*}
+
+For finite samples the matching may not be perfect even under Assumptions (\ref{ATETasmp}. When the matching is perfect both units of this pair have covariate values equal to that of the matched unit, e.g. $X_{i} = X_{m_{i}^{c}}$. Assumptions \ref{ATETasmp} imply that as $n \to \infty$ with scalar covariates, the matching becomes precise. In finite samples, or with discrete covriates, with inexact matching, this isn't the case and $X_{i} \neq X_{m_{i}^{c}}$. Then,
+
+$$\E(Y_{i}^{obs}-Y_{m_{i}^{c}} \mid W_{i} = 1, X_{i} = X_{m_{i}^{c}} = x) = \E(Y_{i}^{obs}-Y_{m_{i}^{c}} \mid X_{i} = X_{m_{i}^{c}} = x) = \mu(1,x) - \mu(0,x) = \tau(x)$$
+
+Now, let $M$ be a bandwidth such that for every $j \in \{1,...,N_{c}\}$ such that $j$ is "closer" to $i$ than $M$, then, $j \in J_{M}(i)$, being the set of matched pairs. Then, when we have $X_{i} \neq X_{m_{i}^{c}}$
+
+\begin{align*} \E_{sp}(Y_{i}^{obs}-Y_{m_{i}^{c}} \mid W_{i} = 1, X_{i}, X_{m_{i}^{c}}) &= \E_{sp}(Y_{i}^{obs}-Y_{m_{i}^{c}} \mid X_{i}, X_{m_{i}^{c}}) = \mu(1,X_{i}) - \mu(0,X_{m_{i}^{c}}) \\
+&\quad= \tau(x)+ \mu(0,X_{i}) -\mu(0,X_{m_{i}^{c}}) \end{align*}
+
+Thus we see in finite samples, when our matching isn't perfect, that there will be a residual bias term that differs from the ATET. \cite{AnI:06} show that the bias term is stochastically bounded, in particular for the ATET it is $O_{p}(N^{-r/k})$, such that if $k > 2r$ the bias term maw disrupt the convergence in distribution. Regardless, for fixed $n$, for finite samples by summing across treated individuals,
+
+\begin{align*} \hat \tau &= N_{1}^{-1}\sum_{W_{i} = 1}\hat \tau_{i}^{t} =\tau+N_{1}^{-1}\sum_{W_{i} = 1}\mu(0,X_{i}) -\mu(0,X_{m_{i}^{c}}) \\
+&\quad= \tau+N_{1}^{-1}\sum_{i}^{N}W_{i}\left(M^{-1}\sum_{j \in J_{M}(i)}(\mu(0,X_{i}) - \mu(0,X_{j}))\right)
+\end{align*}
+
+Now define, 
+
+$$B_{n}^{t} = N_{1}^{-1}\sum_{i}^{N}W_{i}\left(M^{-1}\sum_{j \in J_{M}(i)}(\mu(0,X_{i}) - \mu(0,X_{j}))\right)$$
+
+Then, we have no reason in finite samples that assume that 
+$$B_{n}^{t}=0$$
+Both \cite{OnR:16} and \cite{AnI:06} calculate $\tilde{\tau}^{t} = \hat \tau^{t}-B_{n}^{t}$. \cite{AnI:06} show that this bias term is $O_{p}(N_{1}^{-r/k})$. As a result, $\sqrt{N_{1}}B_{n}^{T}$ is not $O_{p}(1)$ in general, and if $k$ is large enough, the asymptotic distribution of $\sqrt{N_{1}}(\hta-\ta)$ is dominated by the bias term and the matching estimator in general is not $\sqrt{N_{1}}$-consistent. In the case where $k = r = 1$, then we get that $\sqrt{N_{1}}(\hta -\ta)$ will be asymptotically normal. But under Assumptions \ref{ATETasmp} we've tried to generalize this requirement, and thus (generally) require a bias corrected estimator for $\hta$. 
+
+Under assumptions \ref{ATETasmp} we know there are consistent nonparametric estimators $\hat \mu(1,x) \to^{p} \mu(1,x)$ and $\hat \mu(0,x) \to^{p} \mu(0,x))$ for all $x$. Then, the natural estimator that arises is,
+
+\begin{align*}\tilde \tau^{t} &= \hat\tau^{t}-\hat B_{n}^{t} \\
+&= N_{1}^{-1}\sum_{W_{i} = 1}\left((Y_{i}^{obs} -M^{-1}\sum_{j \in J_{M}(i)}Y_{j}^{obs})-\left(M^{-1}\sum_{j \in J_{M}(i)}(\hat \mu(0,X_{i}) - \hat \mu(0,X_{j}))\right)\right) \\
+&= N_{1}^{-1}\sum_{W_{i} = 1}\left((Y_{i}^{obs}-\hat \mu(0,X_{i}) -M^{-1}\sum_{j \in J_{M}(i)}Y_{j}^{obs}-\hat \mu(0,X_{j}))\right) \\
+&= N_{1}^{-1}\sum_{W_{i} = 1}\left((Y_{i}^{obs}-\hat \mu(1,X_{i}) -M^{-1}\sum_{j \in J_{M}(i)}(Y_{j}^{obs}-\hat \mu(0,X_{j}))+\hat \mu(1,X_{i})-\hat \mu(0,X_{i})\right)
+\end{align*}
+
+Moreover, for later notation, we can define $K_{m}(i) = \sum_{l = 1}^{n}I\{i \in J_{m}(l)\}$ to be the number of times a particular observation appears in the match. $e_{i} = Y_{i}-\mu(W_{i}.X_{i})$, and $\epsilon_{i} =  \mu(1,X_{i})-\hat \mu(0,X_{i})$. Then,
+
+\begin{align*} \tilde \tau^{t} &= N_{1}^{-1}\sum_{W_{i} = 1}\left((Y_{i}^{obs}-\hat \mu(1,X_{i}) -M^{-1}\sum_{j \in J_{M}(i)}(Y_{j}^{obs}-\hat \mu(0,X_{j}))+\hat \mu(1,X_{i})-\hat \mu(0,X_{i})\right) \\
+&= N_{1}^{-1}\sum_{i=1}^{N}(W_{i}(\hat e_{i}+\hat \epsilon_{i})+(1-W_{i})M^{-1}K_{m}(i)\hat e_{i})
+\end{align*}
+
+This expression is the same as in \cite{OnR:16} equation (6). Then define $\hat e_{i} = Y_{i}^{obs}-\hat \mu(W_{i},X_{i})$, and $\epsilon_{i} = \hat \mu(1,X_{i})-\hat \mu(0,X_{i})$, such that we get
+
+$$\tilde \tau^{t} = N_{1}^{-1}\sum_{W_{i} = 1}\left((\hat e_{i}-M^{-1}\sum_{j}\hat e_{j})+\epsilon_{i}\right)$$
+
+\cite{OnR:16} then draw a an iid sequence $\{\eta_{i}^{*}\}_{i=1}^{N}$ such that $\E[\eta_{i} \mid Y, X< W] = 0,\ \E[\eta_{i}^{2} \mid Y, X< W] = 1,\ \E[\eta_{i}^{4} \mid Y, X< W] < \infty$ (e.g. \cite{Mam:92}) for each individual in the sample and then applies it to the above form to generate a wild bootstrap.\footnote{Ideally the distribution should match the moments of the underlying process, so mean zero, with second, third, and fourth moments being zero. }
+
+\section{Variance}
+
+Now we return to the proposed bootstrap procedure. A first test of its validity is matching the results of \cite{AnI:08} for their test case, their data generating process is outlined below
+
+\begin{assumption}\label{asmp:ani}
+\begin{enumerate}
+\item The marginal distribution of $X$ is uniform on the interval $[0,1]$
+\item The ratio of treated and control units is $N_{1}/N_{0} = \alpha$ for some $\alpha > 0$
+\item The propensity score $e(x) = P(W_{i} = 1 \mid X_{i} = x)$ is constant
+\item The distribution of $Y_{i}(1)$ is degenerate with $P(Y_{i}(1) = \tau) = 1$ and the conditional distribution of $Y_{i}(0)$ given $X_{i} = x$ is $N(0,1)$
+\end{enumerate}
+\end{assumption}
+
+Under this framework we know that
+
+\begin{align} \hat \tau^{t} &= N_{1}^{-1}\sum_{W_{i} = 1}Y_{i}^{obs}-\sum_{W_{i} = 0}K_{i}Y_{i} \\
+&= \tau -N_{1}^{-1}\sum_{W_{i} = 0}K_{i}Y_{i} \end{align}
+
+Conditioning on $X,W$ we know that $\E(Y_{i}(0) \mid W_{i} = 0, X) = 0$ and has conditional variance 1. And that $\E(Y_{i}(1) \mid W_{i} = 1, X) = \tau$. Then the estimatiion errors are,
+
+\begin{align*} \he &= \Yi - \hYi-\hta \\
+&= \Yi - \hYi - (N_{1}^{-1}\sum_{i}(W_{i}-(1-W_{i})K_{i})Y_{i} \\
+&= \Yi - \hYi - N_{1}^{-1}\sum_{W_{i} = 1}\Yi+N_{1}^{-1}\sum_{W_{i}=0}K_{i})Y_{i}\end{align*}
+
+\begin{align*}\E(\he \mid X,W) &= \E(\Yi - \hYi - N_{1}^{-1}\sum_{W_{i} =
+1)}\Yi+N_{1}^{-1}\sum_{W_{i}=0}K_{i}Y_{i}) \\ &= \tau-0-\tau = 0\end{align*}
+
+For the proposed bootstrap estimator, we have
+
+\begin{align*} \hat \epsilon_{i} &= Y_{i}(1)^{obs}-\hat Y_{i}(0)+\hat \tau^{t} \\
+&= \mu(x_{i},1)+e_{i}+\frac{1}{M}\sum_{j}\left(\mu(0,x_{j})+e_{j}\right)+\hat \tau^{t} \end{align*}
+
+Then, $\Var(\he\mid X,Y,W) = \sum_{j}\Var(e_{j}\mid X,Y,W)+\Var(\hat \tau^{t}\mid X,Y,W)-2\sum_{j}\Cov(\hat \tau^{t},e_{j}\mid X,Y,W)$. As, under the assumptions, we know 
+
+$$\Var(e_{i}\mid X,Y,W) = \begin{cases}0 & W_{i} = 1 \\ 1 & W_{i} = 1 \end{cases}$$
+$$\Var(\hat \tau^{t} \mid X,Y,W) = N_{1}^{-2}\sum_{i}K_{i}^{2}$$
+
+and $\Cov(\hat \tau^{t},e_{j}\mid X,Y,W) = N_{1}^{-1}K_{j}$, and finally, that $\sum_{W_{i}=1}\sum_{j \in J_{m}(i)}1 = \sum_{W_{i} = 0}K_{i}$. As a result, we have
+
+
+\begin{align*} \Var^{*}[\hat \tau_{b}^{t} \mid X,W] &= N_{1}^{-2}\sum_{i}^{N_{1}}\E(\he^{2} \mid X,W) \\
+&= N_{1}^{-2}\sum_{W_{i}=1}\left(N_{1}^{-2}\sum_{W_{i}=0}K_{i}+N_{1}^{2}\sum_{W_{i}=0}K_{i}-\frac{2}{N_{1}}\sum_{j \in J_{m}(i)}K_{j}\right) \\
+&= N_{1}^{-3}\sum_{W_{i}=0}K_{i}+N_{1}^{-3}\sum_{W_{i}=0}K_{i}^{2}-2N_{1}^{-3}\sum_{W_{i}=0}K_{i}^{2} \\
+&= N_{1}^{-3}\sum_{W_{i}=0}K_{i}-N_{1}^{-3}\sum_{W_{i}=0}K_{i}^{2}\end{align*}
+ We can compare this to the conditional variance of $\hta$,
+
+$$\Var(\hta \mid X,W) = \E(N_{1}^{-1}\sum_{i}K_{i}Y_{i}) = N_{1}^{-2}\sum_{i}K_{i}^{2}$$
+
+It is important to remember that under fixed $M$ asymptotics, that $\hat Y_{i}(0)$ is a random variable, and including it in the wild bootstrap estimator when trying to recover the variance of $Y_{i}^{obs}$ for is going to add additonal terms into the conditional variance. In this case, there are two sources of bias. The first, by adding in $Y_{i}(0)$ over the preffered $\hat \mu(1,x_{i})$, where $\hat \mu(\cdot)$ is a consistent estimator for $\mu(\cdot)$ (see \cite{AnI:06} for conditions for this to hold, or \cite{InR:15} for parameetric estimators of this mean). Secondly, we know from the large sample theory that $\hat \tau^{t}$ is also a random variable, and, since we are not imposing a "wild bootstrap" component onto either of these terms, the covariance between them further biases the conditional variance. The clear solutions to these problems has already been covered in \cite{OnR:16}.
+
+
+
+\printbibliography
+
+
+\end{document}
