@@ -20,6 +20,7 @@ condVar <- function(matches) {
   K <- apply(matches, 1, sum, na.rm=TRUE)
   
   condVar <- (n1)^(-2) * sum(K^2)
+  nikVar <- (n1)^(-2) * sum(K) - (n1)^(-3) * sum(K^2)
   
   return(condVar)
   
