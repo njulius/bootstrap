@@ -1,0 +1,160 @@
+\documentclass{article}
+
+\usepackage{amsfonts}
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage[margin=1in]{geometry}
+\usepackage[small]{caption}
+\usepackage{setspace}
+\usepackage{hyperref}
+
+\usepackage{biblatex}
+\addbibresource{bibliography.bib}
+
+\usepackage[shortlabels]{enumitem}
+
+\usepackage[nottoc,notlot,notlof]{tocbibind}
+
+
+\newtheorem{example}{Example}[section]
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{assumption}{Assumption}[section]
+\newtheorem{lemma}{Lemma}[section]
+\newtheorem{claim}{Claim}[section]
+\newtheorem{definition}{Definition}[section]
+\newtheorem{proposition}{Proposition}[section]
+\newtheorem{corollary}{Corollary}[section]
+
+\onehalfspacing
+
+\DeclareMathOperator{\E}{E}
+\DeclareMathOperator{\Var}{Var}
+\DeclareMathOperator{\Cov}{Cov}
+\DeclareMathOperator{\tr}{tr}
+\DeclareMathOperator{\rank}{Rank}
+
+\newcommand{\N}{N_{1}}
+\newcommand{\Nt}{N_{1}^{-2}}
+\newcommand{\ta}{\tau^{t}}
+\newcommand{\hta}{\hat \tau^{t}}
+
+\newcommand{\tb}{\tau_{b}^{t}}
+\newcommand{\htb}{\hat \tau_{b}^{t}}
+
+\newcommand{\pe}{e_{i}}
+\newcommand{\pej}{e_{j}}
+
+\newcommand{\he}{\hat{\epsilon}_{i}}
+\newcommand{\Yi}{Y_{i}^{obs}}
+\newcommand{\Yb}{Y_{i}^{*}}
+\newcommand{\hYi}{\hat{Y_{i}(0)}}
+\newcommand{\us}{u_{i}^{*}}
+
+\begin{document}
+
+
+\title{Kevin's Notes on Matching Estimators for Nik}
+\author{Kevin D. Duncan}
+\maketitle
+
+
+
+Some Assumptions from \cite{OnR:16} and \cite{AnI:08}
+
+\begin{assumption}\label{ATETasmp}
+
+\begin{enumerate}
+\item Conditional on $W_{i} = w$ the sample consistss of independent draws from $Y,X \mid W = w$ for $w \in \{0,1\}$. For some $r \leq 1,\ N_{1}^{r}/N_{0} \to \theta \in (0,\infty)$
+\item $X$ is continuously distributed on compact and convex support $X \subset R^{k}$. The density of $X$ is bounded and bounded away from zero on $\mathbb{X}$.
+\item $W$ is independent of $Y_{i}(0)$ conditional on $X = x$ for almost every $x$. There exists a positive constant $c$ such that $P(W = 1 \mid X= x) \leq 1-c$ for almost every $x$
+\item For $w = 0,1$, $\mu(w,x)$ and $\sigma^{2}(w,x)$ are Lipschitz in $\mathbb{X}$, $\sigma^{2}(w,x)$ is bounded away from zero on $\mathbb{X}$, and $\E[Y^{4} \mid W=w, X=x]$ is bounded uniformly on $\mathbb{X}$.
+\end{enumerate}
+
+\end{assumption}
+
+\begin{table}[h!]
+\title{Proposed Procedure}
+\begin{enumerate}
+\item Estimate $\hta$
+\item Get residuals $\he = \Yi-\hYi-\hta-B_{t}$ for each treated observation $i$. (you constantly forget the hat on the epsilons, its important to denote that its a sample residual and not from the population!)
+\item For each $i$, draw $\us = \bigg\{ \begin{array}{cc} 1 & \text{ with probability } 1/2 \\ -1 & \text{with probability} 1/2 \end{array}$. I.e. the Rademacher distribution
+\item Create $N_{1}$ bootstrap outcomes, $\Yb = \hYi +\hta + \us\he$
+\item Estimate $\htb$ on the bootstrap sample $Z = \{\Yb, W, X\}$
+\item Repeat the steps 3-5 for $b = 1,...,B$ bootstraps, and estimate $\hat \tau$ as the sample variance of $\hat \tau_{b}$ over the $b$ bootstraps.
+\end{enumerate}
+\label{boot}
+\end{table}
+
+
+For each individual we observe an outcome variable $Y_{i}^{obs}$, a set of covariates, $X_{i}$, and whether or not an individual was treated, $W_{i}$, which is either $1$, or $0$. For both the treated and untreated groups, we can define the conditional means, $\mu(0,x) = \E[Y_{i}(0) \mid X_{i} = x]\quad \mu(1,x) = \E[Y_{i}(1) \mid X_{i} = x]$. Then, for each individual $i$, the Average Treatment Effect on the Treated (ATET) is
+
+\begin{align*} \tau_{i}^{t} &= \mu(1,x) - \mu(0,x) \end{align*}
+
+For each group, we have $Y_{i}^{obs} = \mu(W_{i},X_{i})+e_{i}$, whether the error structure may dependend on whether or not an individual was treated or not. Assuming both groups have mean zero errors, we have the sample individual ATET,
+
+\begin{align*} \hat \tau_{i}^{t} &= Y_{i}^{obs}-\hat Y_{i}(0) = Y_{i}(1)-\hat Y_{i}(0) \end{align*}
+
+For finite samples the matching may not be perfect even under Assumptions (\ref{ATETasmp}. Let $M$ be the number of matches, such that $j$ is "closer" to $i$ than $M$, then, $j \in J_{M}(i)$, being the set of matched pairs. Then, when we have $X_{i} \neq X_{m_{i}^{c}}$
+
+\begin{align*} \E_{sp}(Y_{i}^{obs}-Y_{m_{i}^{c}} \mid W_{i} = 1, X_{i}, X_{m_{i}^{c}}) &= \E_{sp}(Y_{i}^{obs}-Y_{m_{i}^{c}} \mid X_{i}, X_{m_{i}^{c}}) = \mu(1,X_{i}) - \mu(0,X_{m_{i}^{c}}) \\
+&\quad= \tau(x)+ \mu(0,X_{i}) -\mu(0,X_{m_{i}^{c}}) \end{align*}
+
+Thus we see in finite samples, when our matching isn't perfect, that there will be a residual bias term that differs from the ATET. \cite{AnI:06} show that the bias term is stochastically bounded, in particular for the ATET it is $O_{p}(N^{-r/k})$, such that if $k > 2r$ the bias term maw disrupt the convergence in distribution. Regardless, for fixed $n$, for finite samples by summing across treated individuals,
+
+\begin{align*} \hat \tau &= N_{1}^{-1}\sum_{W_{i} = 1}\hat \tau_{i}^{t} =\tau+N_{1}^{-1}\sum_{W_{i} = 1}\mu(0,X_{i}) -\mu(0,X_{m_{i}^{c}}) \\
+&\quad= \tau+N_{1}^{-1}\sum_{i}^{N}W_{i}\left(M^{-1}\sum_{j \in J_{M}(i)}(\mu(0,X_{i}) - \mu(0,X_{j}))\right)
+\end{align*}
+
+Now define, 
+
+$$B_{n}^{t} = N_{1}^{-1}\sum_{i}^{N}W_{i}\left(M^{-1}\sum_{j \in J_{M}(i)}(\mu(0,X_{i}) - \mu(0,X_{j}))\right)$$
+
+Under assumptions \ref{ATETasmp} we know there are consistent nonparametric estimators $\hat \mu(1,x) \to^{p} \mu(1,x)$ and $\hat \mu(0,x) \to^{p} \mu(0,x))$ for all $x$. Then, the natural estimator that arises is,
+
+\begin{align*}\tilde \tau^{t} &= \hat\tau^{t}-\hat B_{n}^{t} \\
+&= N_{1}^{-1}\sum_{W_{i} = 1}\left((Y_{i}^{obs} -M^{-1}\sum_{j \in J_{M}(i)}Y_{j}^{obs})-\left(M^{-1}\sum_{j \in J_{M}(i)}(\hat \mu(0,X_{i}) - \hat \mu(0,X_{j}))\right)\right) \\
+&= N_{1}^{-1}\sum_{W_{i} = 1}\left((Y_{i}^{obs}-\hat \mu(0,X_{i}) -M^{-1}\sum_{j \in J_{M}(i)}Y_{j}^{obs}-\hat \mu(0,X_{j}))\right) \\
+&= N_{1}^{-1}\sum_{W_{i} = 1}\left((Y_{i}^{obs}-\hat \mu(1,X_{i}) -M^{-1}\sum_{j \in J_{M}(i)}(Y_{j}^{obs}-\hat \mu(0,X_{j}))+\hat \mu(1,X_{i})-\hat \mu(0,X_{i})\right)
+\end{align*}
+
+We want to evaluate the probability limiting behavior of,
+
+\begin{align*} \Var^{*}(\htb) &= N_{1}^{-2}\sum_{W_{i}=1}\E^{*}(u_{i}^{*}\he^{2})= N_{1}^{-2}\sum_{W_{i}=1}\he^{2} \\
+&= \Nt \sum_{W_{i}=1}(Y_{i}(1)-\hat{Y_{i}(0)}-\hta)^{2} \\
+&= \Nt \sum_{W_{i} = 1}(Y_{i}(1)^{2}+\hat{Y_{i}(0)}^{2}+\hat \tau^{t2}-2Y_{i}(1)\hat{Y_{i}(0)}-2Y_{i}(1)\hta+2\hat{Y_{i}(0)}\hta)
+\end{align*}
+
+and we know by law of large numbers (this is tentative, and meant to be illustrative, generally we want to expand each term and then apply a weak/strong law of large numbers. Convergence in probability is all that is required). I.e. Under Assumptions \ref{ATETasmp} we know that individuals are $iid$, that $\E(\mu(W_{i},X_{i}))$ and $\E(\mu(W_{i},X_{i})^{2})$ exists for all $i$, $\E(e_{i})$ and $\E(e_{i}^{2})$ exist for all $i$, then by the strong law of large numbers, 
+
+\begin{align*}
+\Nt \sum_{W_{i}=1}Y_{i}(1)^{2} &= \Nt \sum_{W_{i}=1}\mu(1,x_{i})^{2}+\mu(1,x_{i})e_{i}+e_{i}^{2}\\
+\implies \Nt \sum_{W_{i}=1}\mu(1,x_{i})^{2} &\to^{p}\ \bar{\mu(1,x)}^{2} \\
+\Nt \sum_{W_{i}=1}\mu(1,x_{i})e_{i} &\to^{p} 0 \\
+\Nt \sum_{W_{i}=1} e_{i} &= N_{1}^{-1}\frac{\sum_{W_{i}=1}e_{i}^{2}}{N_{1}} \to^{p} 0 \\
+\end{align*}
+
+For our sample estimator for the ATET,
+\begin{align*} \hat \tau^{t} &= \frac{1}{N_{t}}\left(\sum_{W_{i}=1}Y_{i}(1) - \sum_{W_{i}=0}K_{i}Y_{i}(0)\right) \\
+\implies (\hat \tau^{t})^{2} &= \frac{1}{N_{t}^{2}}(\sum_{W_{i}=1}Y_{i}(1)^{2}+\sum_{W_{i}=1,W_{j} = 1, j \neq i}Y_{i}(1)Y_{j}(1) \\
+&\quad+\sum_{W_{i}=0}K_{i}^{2}Y_{i}(0)^{2}+\sum_{W_{i}=0,W_{j}=0, j \neq i}K_{i}Y_{i}(0)K_{j}Y_{j}(0) \\
+&\quad-2\sum_{W_{i}=1}Y_{i}(1)\sum_{W_{i}=0}K_{i}Y_{i}(0))\end{align*}
+
+Similarly,
+
+\begin{align*} \hat{Y_{i}(0)} &= \frac{1}{M}\sum_{j \in J_{m}(i)}Y_{j}(0) \\
+\implies (\hat{Y_{i}(0)})^{2} &= \frac{1}{M^{2}}(\sum_{j \in J_{m}(i)}Y_{j}(0)^{2}+\sum_{j,k \in J_{m}(i), j \neq k}Y_{j}(0)Y_{k}(0))\end{align*}
+
+and $\sum_{W_{i} = 1}\sum_{j \in J_{m}(i)}1 = \sum_{W_{i}=0}K_{i}$. Then,
+
+\begin{align*} \sum_{W_{i} = 1}\hat{Y_{i}(0)} &= \frac{1}{M^{2}}\sum_{W_{i}=1}(\sum_{j \in J_{m}(i)}Y_{j}(0)^{2}+\sum_{j,k \in J_{m}(i), j \neq k}Y_{j}(0)Y_{k}(0)) \\
+&=\frac{1}{M^{2}}\sum_{W_{i}=0}K_{i}Y_{i}(0)^{2}+\frac{1}{M^{2}}\sum_{W_{j}=0, W_{k} = 0, j \neq k}K_{j}Y_{j}(0)K_{k}Y_{k}(0))
+\end{align*}
+
+Continuing our exansion,
+
+$$2N_{1}^{-2}\sum_{W_{i}=1}Y_{i}(1)\hat{Y_{i}(0)} = 2N_{1}^{-2}\sum_{W_{i}=1}Y_{i}(1)\sum_{j \in J_{M}(i)}Y_{j}(0)$$
+
+$$2N_{1}^{-2}\sum_{W_{i}=1}Y_{i}(1)\hta = $$
+
+$$2N_{1}^{_2}\sum_{W_{i}=1}\hat{Y_{i}(0)}\hta = $$
+
+\end{document}
