@@ -1,0 +1,152 @@
+\documentclass[10pt,letterpaper]{article}
+\usepackage[latin1]{inputenc}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{setspace}
+\usepackage{bm}
+\doublespacing
+\usepackage{amssymb}
+\usepackage{graphicx}
+\graphicspath{{C:/Users/youarenot/Documents/}}
+\usepackage{xcolor,soul}
+\sethlcolor{lightgray}
+\author{Nik Julius}
+\title{Failure of the Simple Wild Bootstrap}
+\begin{document}
+\maketitle
+
+\section{Setup}
+
+We assume a dataset consisting of $N$ observations of $\left\{Y, W, X\right\}$. $Y_i$ is the outcome of interest, $W_i$ is a binary variable that is 1 if unit $i$ received the treatment, and $X_i$ is the covariate on which matches are made. For notational convenience, let $Y_i(1)$ be the outcome of unit $i$ conditional on $i$ receiving treatment, and $Y_i(0)$ be the outcome of unit $i$ conditional on \textit{not} receiving treatment. There are $N_1$ treated units, and $N_0$ control units - thus, $N = N_1 + N_0$.\\ \\
+Let the true treatment average effect on the treated (ATET) be $\tau_t$, the matching estimator of the ATET be $\hat{\tau}_t$, and the matching estimator of the ATET on a bootstrapped dataset be $\hat{\tau}^*_t$. We can express $\tau_t$ as:
+\begin{align}
+\tau_t &= \mathbb{E} \left[ Y_i(1) - Y_i(0) | W_i = 1 \right]
+\end{align}
+The nearest-neighbor matching estimator constructs an estimate of (1) by constructing the counterfactual $Y_i(0)|W_i = 1$ as the outcome of the control unit whose covariate was closest to $X_i$. Doing this for all units produces $N_1$ pairs, and the matching estimator of the ATET is constructed by averaging the outcome differences over the $N_1$ pairs.\\ \\
+Formally, let $D_i$ be the distance between the covariate value of $i$ and the covariate value of the closest control unit:
+\begin{align}
+D_i &= \min_{j = 1,2,...,N: W_j = 0} \mid \mid X_i - X_j \mid \mid
+\end{align}
+And let
+\begin{align}
+\mathcal{J}(i) &= \left\{j \in \{1, 2, ..., N \} : W_j = 0, \mid \mid X_i - X_j \mid \mid = D_i \right\}
+\end{align}
+be the set of closest matches for treated unit $i$. If $i$ is untreated, $\mathcal{J}(i)$ is the empty set. $\mathcal{J}(i)$ contains the indexes of all observations that are untreated and satisfy $\mid\mid X_i - X_j \mid\mid = D_i$.\\ \\
+Thus the estimated counterfactual outcome $\widehat{Y_i(0)}$ can be obtained as:
+\begin{align}
+\widehat{Y_i(0)} &= \frac{1}{\# \mathcal{J}(i)} \sum_{j \in \mathcal{J}(i)} Y_j
+\end{align}
+where $\#\mathcal{J}(i)$ is the number of elements in $\mathcal{J}(i)$. The estimator of the ATET is then obtained as:
+
+\begin{align}
+\hat{\tau}_t &= \frac{1}{N_1} \sum_{i: W_i = 1} \left( Y_i - \widehat{Y_i(0)}\right)
+\end{align}
+It is useful to note that an alternative representation exists. Let
+\begin{align}
+K_i &= \sum_{W_j = 1} 1\left\{i \in \mathcal{J}(i)\right\} \frac{1}{\# \mathcal{J}(i)}
+\end{align}
+be the weighted number of times $i$ is used as a match. Since treated units are never used as a match, $K_i$ is 0 if $i$ received treatment. Then the estimated ATET can be represented as:
+\begin{align}
+\hat{\tau}_t &=\frac{1}{N_1} \sum_{i = 1}^{N} \left(W_i - (1 - W_i) K_i \right) Y_i
+\end{align}
+
+\section{Proof of Failure}
+
+To prove the failure of the proposed procedure, we need to define some further terms. Let $\mu(w,x) = \mathbb{E}[Y_i | W = w, X = x]$, $\sigma^2(w,x) = \mathbb{V}(Y \mid W = w, X = x)$, $\tau_i = \mu(1,X_i) - \mu(0,X_i)$, $\hat{\tau}_i = Y_i(1) - \widehat{Y_i(0)}$, $\xi_i = \tau_i - \tau_t$, and $\hat{\xi_i} = \hat{\tau}_i - \hat{\tau}_t$. Let $M(i)$ be a function that returns the index of the unit matched to $i$ - that is to say, $M(i)$ satisfies $\widehat{Y_i(0)} = Y_{M(i)}$. Finally, let $e_i = Y_i - \mu(W_i, X_i)$, and let $\left\{\epsilon^*_i\right\}_{i=1}^{N}$ be an i.i.d. sequence satisfying $\mathbb{E}\left[\epsilon^*_i | \bold{Z}\right] = 0$, $\mathbb{E}\left[\epsilon_i^{*2} | \bold{Z} \right] = 1$, and $\mathbb{E}\left[\epsilon^{*4}_i |\bold{Z} \right] \leq +\infty$. An natural example of such would be to draw $\epsilon^*_i$ from the Radembacher distribution, which assigns values -1 and +1 with equal probability.\\ \\
+With these definitions, we can rewrite the bootstrapped estimate of the ATET as follows:
+\begin{align}
+\hat{\tau}^*_t &= \hat{\tau} + \frac{1}{N_1} \sum_{W_i = 1} \epsilon_i^* \hat{\xi_i}
+\end{align}
+It is useful to decompose this into a form based on the population error terms:
+\begin{align}
+\hat{\tau}^*_t &= \hat{\tau} + \frac{1}{N_1} \sum_{W_i = 1} \epsilon_i^* \xi_i + \frac{1}{N_1} \sum_{W_i = 1} \epsilon_i^* \left(\hat{\xi}_i - \xi_i\right)
+\end{align}
+For notational convenience, let
+\begin{align}
+T_N^{t*} &= \frac{1}{N_1} \sum_{W_i = 1} \epsilon_i^* \xi_i \nonumber \\
+R_N^{t*} &= \frac{1}{N_1} \sum_{W_i = 1} \epsilon_i^* \left(\hat{\xi}_i - \xi_i\right) \nonumber
+\end{align}
+Noting that $\hat{\tau}_t^* - \hat{\tau}_t = T_N^{t*} + R_N^{t*}$, proving the failure of this bootstrap requires showing that
+\begin{align}
+\sup_t \left\lvert Pr\left\{ \sqrt{N_1} \left(T_N^{t*} + R_N^{t*} \right) \leq t \mid \bold{Z} \right\} - Pr \left\{ \sqrt{N_1} \left( \hat{\tau}_t - \tau_t \right) \leq t \right\} \right\rvert \nrightarrow_p 0
+\end{align}
+It seems obvious that $R_N^{t*}$ is a remainder term of some kind, so we should expect it to converge in probability to 0 at some rate. Thus, I will first show that
+\begin{align}
+\sup_t \left\lvert Pr\left\{ \sqrt{N_1} T_N^{t*} \leq t \mid \bold{Z} \right\} - Pr \left\{ \sqrt{N_1} \left( \hat{\tau}_t - \tau_t \right) \leq t \right\} \right\rvert \nrightarrow_p 0
+\end{align}
+Abadie \& Imbens show that $\sqrt{N_1}(\hat{\tau}_t - \tau_t)/\sigma^t_N$ is asymptotically normal, so to prove (11) I will instead show that
+\begin{align}
+\mathbb{V}\left( \sqrt{N_1} T_N^{t*} \mid \bold{Z} \right) - (\sigma^t_N)^2 \nrightarrow_p 0
+\end{align}
+which shows that $T_N^{t*}$ has the wrong variance and so cannot be the same as the target distribution. The target variance, $(\sigma^t_N)^2$, is given as follows:
+\begin{align}
+(\sigma^t_N)^2 &= (\sigma^t_{1N})^2 + (\sigma^t_2)^2 \nonumber \\
+(\sigma^t_{1N})^2 &= \frac{1}{N_1} \sum_{i = 1}^{N} \left( W_i + (1-W_i)\sum_{l=1}^{N} 1\left\{i \in \mathcal{J}(l)\right\}\right)^2 \sigma^2(W_i, X_i) \nonumber \\
+(\sigma^t_2)^2 &= \mathbb{E}\left[\left(\mu(1,X_i) - \mu(0,X_i) - \tau_t \right)^2\mid W_i = 1 \right] \nonumber
+\end{align}
+Thus, note that:
+\begin{align}
+\mathbb{V}\left(\sqrt{N_1} T_N^{t*} \mid \bold{Z} \right) &= \mathbb{E}\left( N_1 (T_N^{t*})^2 \mid \bold{Z}\right) \\
+&= \mathbb{E}\left( \frac{1}{N_1} \sum_{W_i = 1} \epsilon_i^* \xi_i \cdot \sum_{W_j = 1} \epsilon_j^* \xi_j  \mid \bold{Z} \right)
+\end{align}
+where (13) follows because $\mathbb{E}(T_N^{t*}) = 0$. We can rewrite (14) as the sum of squared terms and the cross-products:
+\begin{align}
+\mathbb{V}\left(\sqrt{N_1} T_N^{t*} \mid \bold{Z} \right) &= \mathbb{E} \left( \frac{1}{N_1} \sum_{W_i = 1} \epsilon_i^* \xi_i  \sum_{i \neq j: W_j = 1} \epsilon_j^* \xi_j + \frac{1}{N_1} \sum_{W_i = 1} \epsilon_i^{*2} \xi_i^2 \mid \bold{Z} \right)
+\end{align}
+Since $\epsilon_i^*$ and $\epsilon_j^*$ are independent by definition\footnote{I'm not sure if this is sufficient, but it is easy to see that each $\xi_i \xi_j$ term is multiplied by $\epsilon_i^* \epsilon_j^*$, and it is straightforward to verify that $\epsilon_{ij}^* = \epsilon_i^* \epsilon_j^*$ has the same distribution as $\epsilon_i^*$.}, (15) becomes:
+\begin{align}
+\mathbb{E}\left( \frac{1}{N_1} \sum_{W_i = 1} \epsilon_i^{*2} \xi_i^2 \mid \bold{Z} \right)
+\end{align}
+Since $\epsilon_i^{*2} = 1$ always, and $\xi_i$ is a population parameter, we end with:
+\begin{align}
+\mathbb{V}\left( \sqrt{N_1} T_N^{t*} \mid \bold{Z} \right) &= \frac{1}{N_1} \sum_{W_i = 1} \xi_i^2 \nonumber \\
+&= \frac{1}{N_1} \sum_{W_i = 1} \left( \tau_i - \tau_t \right)^2
+\end{align}
+Looking back at the target variance, we can see that (17) converges in probability to $(\sigma_2^t)^2$ immediately by the law of large numbers. Thus we can claim that
+\begin{align}
+\mathbb{V}\left( \sqrt{N_1} T_N^{t*} \mid \bold{Z} \right) - (\sigma^t_2)^2 \rightarrow_p 0
+\end{align}
+But, since it is obvious that $(\sigma_{1N}^t)^2 \nrightarrow_p 0$, (18) establishes that (12) holds.\\ \\
+To recap, we have established that $T_N^{t*}$ does not have the correct variance on its own. It remains possible that $T_N^{t*} + R_N^{t*}$ \textit{does} have the correct variance. To show that it does not, it would suffice to show either that $\sqrt{N_1}R_{N}^{t*} \rightarrow_p 0$ or that $\mathbb{V}\left( \sqrt{N_1} R_N^{t*} \mid \bold{Z} \right) - (\sigma^t_{1N})^2 \nrightarrow_p 0$. I show the second.\\ \\
+First, note that:
+\begin{align}
+\mathbb{V}\left( \sqrt{N_1} R_N^{t*} \mid \bold{Z} \right) &= \mathbb{E} \left( N_1 (R_N^{t*})^2 \mid \bold{Z} \right) \\
+&= \mathbb{E} \left( \frac{1}{N_1} \sum_{W_i = 1} \epsilon_i^{*2} \left( \hat{\xi}_i - \xi_i \right)^2\mid \bold{Z} \right)
+\end{align}
+Noting again that $\epsilon_i^{*2} = 1$, (20) becomes:
+\begin{align}
+\mathbb{V}\left( \sqrt{N_1} R_N^{t*} \mid \bold{Z} \right) &=  \mathbb{E} \left( \frac{1}{N_1} \sum_{W_i = 1} \left( \hat{\xi}_i^2 + \xi_i^2 - 2 \hat{\xi}_i \xi_i \right) \mid \bold{Z} \right) \nonumber \\
+&= \mathbb{E} \left( \frac{1}{N_1} \sum_{W_i = 1} \hat{\xi}_i^2 \mid \bold{Z} \right) + \mathbb{E}\left( \frac{1}{N_1} \sum_{W_i = 1} \xi_i^2 \mid \bold{Z} \right) + 2\mathbb{E} \left( \frac{1}{N_1} \sum_{W_i = 1} \hat{\xi}_i \xi_i \mid \bold{Z} \right)
+\end{align}
+Conditioned on $\bold{Z}$, all these quantities are either parameters or known, so we can drop the expectations to get:
+\begin{align}
+\mathbb{V}\left( \sqrt{N_1} R_N^{t*} \mid \bold{Z} \right) &= \frac{1}{N_1} \sum_{W_i = 1} \hat{\xi}_i^2  +  \frac{1}{N_1} \sum_{W_i = 1} \xi_i^2  + 2 \frac{1}{N_1} \sum_{W_i = 1} \hat{\xi}_i \xi_i \\
+&\rightarrow_p \mathbb{E}\left(\hat{\xi}_i^2 \right) + \mathbb{E}\left(\xi_i^2\right) + 2 \mathbb{E}\left( \hat{\xi}_i \xi_i \right) 
+\end{align}
+We proceed by considering each piece individually. There may be a much better way of doing this, but I haven't figured it out.
+\begin{align}
+\mathbb{E}\left( \hat{\xi}_i^2 \right) &= \mathbb{E}\left( \left(\hat{\tau}_i - \hat{\tau}_t \right)^2\right) \nonumber \\
+&= \mathbb{E}\left(\left( Y_i(1) - \widehat{Y_i(0)} - \frac{1}{N_1} \sum_{W_i=1} \left(Y_i(1) - \widehat{Y_i(0)} \right) \right)^2\right)
+\end{align}
+It can be shown through tedious algebra that:
+\begin{align}
+\mathbb{E}\left( \hat{\xi}_i^2 \right) &= \mathbb{E}\left( Y_i(1)^2 + \widehat{Y_i(0)}^2 + \overline{Y_i(1)}^2 + \widehat{\overline{Y_i(0)}}^2 - 2 Y_i(1) \widehat{Y_i(0)} - 2 Y_i(1) \overline{Y_i(1)} \right. \nonumber \\
+&\quad \left. + 2Y_i(1) \widehat{\overline{Y_i(0)}} + 2 \widehat{Y_i(0)} \overline{Y_i(1)} - 2\widehat{Y_i(0)} \widehat{\overline{Y_i(0)}} - 2 \widehat{\overline{Y_i(0)}} \overline{Y_i(1)} \right)
+\end{align}
+where $\overline{Y_i(1)} = \frac{1}{N_1} \sum_{W_i=1} Y_i(1)$ and $\widehat{\overline{Y_i(0)}} = \frac{1}{N_1} \sum_{W_i = 1} \widehat{Y_i(0)}$. Again, proceed piece-by-piece. Note that:
+\begin{align}
+\mathbb{E}\left(Y_i(1)^2 \right) &= \mathbb{E}\left(\left(\mu(1,X_i) + e_i\right)^2\right) \nonumber \\
+&= \mathbb{E}\left( \mu(1,X_i)^2 + 2 \mu(1,X_i)e_i + e_i^2 \right)
+\end{align}
+$e_i$ is independent of $\mu(1,X_i)$ (I think), so we are left with:
+\begin{align}
+\mathbb{E}\left( Y_i(1)^2 \right) &= \mathbb{E}\left( \mu(1,X_i)^2 \right) + \mathbb{E}\left(e_i^2\right)
+\end{align}
+Expand everything in (23) and see if you get cancellations first.
+
+
+
+
+\end{document}
+
