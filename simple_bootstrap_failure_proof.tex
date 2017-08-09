@@ -145,8 +145,18 @@ $e_i$ is independent of $\mu(1,X_i)$ (I think), so we are left with:
 \end{align}
 Expand everything in (23) and see if you get cancellations first.
 
+OTSU AND RAI DO THIS BASICALLY:
+
+\begin{align}
+R^{t*}_N = \frac{1}{N_1} \sum_{W_i = 1} \epsilon_i^* \left( \hat{\xi}_i - \xi_i \right)
+\end{align}
+Decompose into
+\begin{align}
+R^{t*}_N = \frac{1}{N_1} \sum \epsilon_i^* \left( Y_i(1) - \mu(1,X_i) \right) + \frac{1}{N_1} \sum \epsilon_i^* \left( \widehat{Y_i(0)} - \mu(0,X_i)\right) + \frac{1}{N_1} \sum \epsilon_i^* \left(\hat{\tau}_t - \tau_t \right)
+\end{align}
+AI show the last thing goes to zero at the right rate by consistency of matching estimator. Use CS inequality to say $|E(\epsilon_i^* e_i)|^2 \leq E(e_i^2) \rightarrow_p 0$ (by assumption on estimator quality). Do this for everything. Sticking point is matching error.
+
 
 
 
 \end{document}
-
