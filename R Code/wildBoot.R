@@ -63,7 +63,7 @@ wildBoot <- function(Z, matches) {
   
   stackedOut <- rbind(bootTreated, controlSample)
   
-  out <- cbind(stackedOut, K, counterFact, idioError, radembacher)
+  out <- cbind(stackedOut, K, counterFact, xiHat, idioError, radembacher)
   
   return(out)
   
