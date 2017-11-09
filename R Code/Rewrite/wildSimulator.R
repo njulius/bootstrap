@@ -17,7 +17,7 @@ wildSimulator <- function(numObs, treatRatio, trueTau, numBoots, iterations) {
     
     # Find ATET
     
-    outTHat <- getATET(Z)
+    outTHat <- getATET(Z, matches)
     
     # Bootstrap the dataset numBoots times, and save the bHats
     # Construct synthetic correct bHats, save those too
