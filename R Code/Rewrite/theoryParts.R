@@ -1,4 +1,4 @@
-theoryParts <- function(Z, bootZ, matches, radem) {
+theoryParts <- function(Z, bootZ, matches, radem, trueTau) {
   
   # Split sample
   treatedSample <- Z[which(Z[,2] == 1),]
@@ -7,7 +7,7 @@ theoryParts <- function(Z, bootZ, matches, radem) {
   n1 <- length(treatedSample[,1])
   n0 <- length(controlSample[,1])
   
-  tau <- 5 # HARDCODED VALUE OF TAU
+  tau <- trueTau
   
   # Get ATET
   
