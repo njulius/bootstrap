@@ -27,7 +27,7 @@ wildSimulator <- function(numObs, treatRatio, trueTau, numBoots, iterations) {
     
     for(j in 1:numBoots) {
       # Draw rademacher
-      radem <- sample(c(-1,1), replace=TRUE, times=numObs)
+      radem <- sample(c(-1,1), replace=TRUE, size=numObs)
       
       # Bootstrap the dataset
       
