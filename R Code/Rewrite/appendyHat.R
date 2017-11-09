@@ -32,10 +32,6 @@ appendyHat <- function(Z, matches) {
   
   # Generate rademacher draws
   
-  radem <- sample(c(-1,1), replace = TRUE, size = n0 + n1)
-  
-  Z <- cbind(Z, radem)
-  
   return(Z)
   
 }
