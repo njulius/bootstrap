@@ -1,4 +1,4 @@
-wildBoot <- function(Z, matches) {
+wildBoot <- function(Z, matches, radem) {
   
   bigZ <- makeBigZ(Z, matches)
   
@@ -14,7 +14,7 @@ wildBoot <- function(Z, matches) {
   
   resids <- bigZ[,3] - tHat - bigZ[,7]
   
-  perturb <- bigZ[,8] * resids
+  perturb <- radem * resids
   
   # Make NA perturbs 0, because we aren't perturbing those
   
