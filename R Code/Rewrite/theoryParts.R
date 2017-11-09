@@ -60,5 +60,5 @@ theoryParts <- function(Z, bootZ, matches, radem) {
   
   # So the synthetically corrected bootstrap estimator would be tHat + Rn + correctQn
   
-  return(Qn, Rn, tHat, bHat, correctQn)
+  return(cbind(Qn, Rn, tHat, bHat, correctQn))
 }
