@@ -42,7 +42,7 @@ appendUnitTET <- function(Z, matches) {
   
   unitTET <- treatedSample[,3] - counterFactuals
   
-  unitTETs <- c(unitTET, rep(0, times=n0))
+  unitTETs <- c(unitTET, rep(NA, times=n0))
 
   Z <- cbind(Z, unitTETs)
   
